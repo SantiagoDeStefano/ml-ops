@@ -2,3 +2,5 @@
 __pycache__
 /outputs
 /.ipynb_checkpoints
+/mlruns
+/artifacts
