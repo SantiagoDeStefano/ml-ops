@@ -1,0 +1,4 @@
+[core]
+    remote = dataremote
+['remote "dataremote"']
+    url = s3://aide-ap-southeast-1/data

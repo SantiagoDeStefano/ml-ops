@@ -1,6 +1,6 @@
 .venv
 __pycache__
-/outputs
-/.ipynb_checkpoints
-/mlruns
-/artifacts
+notebooks/.ipynb_checkpoints
+notebooks/mlruns
+notebooks/artifacts
+notebooks/outputs
