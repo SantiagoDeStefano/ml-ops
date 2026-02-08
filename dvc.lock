@@ -1,0 +1,20 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/common/preprocess.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: b9fe74759517f248591b6834cac9ee9d.dir
+      size: 66212309
+      nfiles: 1
+    - path: src/common/preprocess.py
+      hash: md5
+      md5: a52b27e45320cac3987f8d5e868c9773
+      size: 1536
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 0bf13e764c1475104b46ba35d479b601.dir
+      size: 65764672
+      nfiles: 3

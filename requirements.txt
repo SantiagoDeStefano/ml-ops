@@ -1,1 +1,4 @@
 mlflow
+torch
+datasets
+transformers
