@@ -2,3 +2,5 @@ mlflow
 torch
 datasets
 transformers
+tensorflow
+huggingface_hubs

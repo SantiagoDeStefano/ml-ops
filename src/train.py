@@ -13,7 +13,6 @@ from sklearn.metrics import accuracy_score, f1_score
 import mlflow
 import mlflow.transformers
 
-
 MODEL_NAME = "prajjwal1/bert-tiny"
 OUT_MODEL_DIR = "models/model"
 
@@ -72,15 +71,15 @@ def main():
     )
 
     args = TrainingArguments(
-        output_dir="artifacts/hf_checkpoints",
+        output_dir="./outputs",
         eval_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="steps",
         logging_steps=50,
-        learning_rate=2e-5,
+        learning_rate=3e-6,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=32,
-        num_train_epochs=2,
+        num_train_epochs=1,
         weight_decay=0.01,
         seed=SEED,
         load_best_model_at_end=True,
@@ -97,9 +96,9 @@ def main():
         compute_metrics=compute_metrics,
     )
 
-    mlflow.set_experiment("film-sentiment")
+    mlflow.set_experiment("review-sentiment")
 
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
         mlflow.log_param("model_name", MODEL_NAME)
         mlflow.log_param("max_len", MAX_LEN)
         mlflow.log_param("epochs", 2)
@@ -120,11 +119,24 @@ def main():
             transformers_model={"model": trainer.model, "tokenizer": tokenizer},
             artifact_path="model",
             task="text-classification",
+            pip_requirements=[
+                "mlflow",
+                "torch",
+                "datasets",
+                "transformers",
+                "huggingface_hub"
+            ]
         )
 
         print("Training done. Saved model to:", OUT_MODEL_DIR)
         print("Eval metrics:", metrics)
 
+        run_id = run.info.run_id
+
+    mlflow.register_model(
+        model_uri=f"runs:/{run_id}/model",
+        name="review-sentiment-transformer"
+    )
 
 if __name__ == "__main__":
     main()

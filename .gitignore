@@ -1,6 +1,5 @@
 .venv
 __pycache__
 notebooks/.ipynb_checkpoints
-notebooks/mlruns
-notebooks/artifacts
-notebooks/outputs
+outputs/
+mlruns/
