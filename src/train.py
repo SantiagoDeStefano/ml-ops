@@ -98,7 +98,7 @@ def main():
 
     mlflow.set_experiment("review-sentiment")
 
-    with mlflow.start_run() as run:
+    with mlflow.start_run():
         mlflow.log_param("model_name", MODEL_NAME)
         mlflow.log_param("max_len", MAX_LEN)
         mlflow.log_param("epochs", 2)
@@ -125,18 +125,12 @@ def main():
                 "datasets",
                 "transformers",
                 "huggingface_hub"
-            ]
+            ],
+            registered_model_name="review-sentiment-transformer"
         )
 
         print("Training done. Saved model to:", OUT_MODEL_DIR)
         print("Eval metrics:", metrics)
-
-        run_id = run.info.run_id
-
-    mlflow.register_model(
-        model_uri=f"runs:/{run_id}/model",
-        name="review-sentiment-transformer"
-    )
 
 if __name__ == "__main__":
     main()
