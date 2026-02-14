@@ -13,8 +13,7 @@ from sklearn.metrics import accuracy_score, f1_score
 import mlflow
 import mlflow.transformers
 
-# MODEL_NAME = "sshleifer/tiny-distilroberta-base"
-MODEL_NAME = "prajjwal1/bert-tiny"
+MODEL_NAME = "google/bert_uncased_L-2_H-128_A-2"
 OUT_MODEL_DIR = "models/model"
 
 TEXT_COL = "review"
