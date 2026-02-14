@@ -115,7 +115,7 @@ def main():
         mlflow.log_metrics(metrics)
 
         # log to MLflow model artifact
-        mlflow.transformers.log_model(
+        mlflow.transformers.log_model( # type: ignore
             transformers_model={"model": trainer.model, "tokenizer": tokenizer},
             artifact_path="model",
             task="text-classification",
