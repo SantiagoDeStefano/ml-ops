@@ -13,7 +13,8 @@ from sklearn.metrics import accuracy_score, f1_score
 import mlflow
 import mlflow.transformers
 
-MODEL_NAME = "sshleifer/tiny-distilroberta-base"
+# MODEL_NAME = "sshleifer/tiny-distilroberta-base"
+MODEL_NAME = "prajjwal1/bert-tiny"
 OUT_MODEL_DIR = "models/model"
 
 TEXT_COL = "review"

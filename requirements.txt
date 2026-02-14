@@ -2,5 +2,7 @@ mlflow
 torch
 datasets
 transformers
+transformers[torch]
 tensorflow
-huggingface_hubs
+dvc
+dvc-s3
