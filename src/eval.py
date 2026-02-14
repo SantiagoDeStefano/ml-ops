@@ -46,7 +46,7 @@ def main():
         "test_samples": int(len(test_df)),
     }
 
-    with open("metrics.json", "w") as f:
+    with open("outputs/metrics.json", "w") as f:
         json.dump(metrics, f, indent=2)
 
     print("Saved metrics.json")

@@ -22,4 +22,4 @@ stages:
       - data/processed/test.csv
       - src/eval.py
     metrics:
-      - metrics.json
+      - outputs/metrics.json
