@@ -5,3 +5,4 @@ models/
 outputs/
 mlruns/
 /metrics.json
+.env
