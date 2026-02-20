@@ -6,5 +6,3 @@ transformers[torch]
 tensorflow
 dvc
 dvc-s3
-pydantic
-python-dotenv

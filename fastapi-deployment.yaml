@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-gateway
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi-gateway
+  template:
+    metadata:
+      labels:
+        app: fastapi-gateway
+    spec:
+      containers:
+      - name: fastapi-gateway
+        image: 528471665809.dkr.ecr.ap-southeast-1.amazonaws.com/fastapi-gateway:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: KSERVE_URL
+          value: "http://test-model-predictor.default.svc.cluster.local/v1/models/test-model:predict"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
