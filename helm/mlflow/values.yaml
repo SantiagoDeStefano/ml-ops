@@ -1,0 +1,12 @@
+image:
+  repository: ghcr.io/mlflow/mlflow
+  tag: latest
+
+service:
+  port: 5000
+
+s3:
+  bucket: s3://aide1-ap-southeast-1/mlflow/
+  region: ap-southeast-1
+
+secretName: s3-credentials

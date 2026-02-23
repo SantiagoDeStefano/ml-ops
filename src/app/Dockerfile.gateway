@@ -1,0 +1,16 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements/requirements.gateway.txt .
+
+RUN pip install -r requirements.gateway.txt
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+COPY models/model/tokenizer.json /app/tokenizer/
+COPY models/model/tokenizer_config.json /app/tokenizer/
+COPY models/model/config.json /app/tokenizer/
+
+COPY src/app/gateway.py .
+
+CMD ["uvicorn", "gateway:app", "--host", "0.0.0.0", "--port", "8080"]

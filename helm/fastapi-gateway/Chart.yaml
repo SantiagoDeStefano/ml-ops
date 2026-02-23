@@ -1,0 +1,4 @@
+apiVersion: v2
+name: fastapi-gateway
+description: FastAPI Pre/Post Processing Gateway
+version: 0.1.0

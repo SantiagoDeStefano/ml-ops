@@ -1,37 +1,35 @@
-from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from pydantic import BaseModel
-import requests
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
-app = FastAPI()
+MODEL_DIR = os.getenv("MODEL_DIR", "/mnt/models/model")
 
-KSERVE_URL = os.getenv("KSERVE_URL")
-if not KSERVE_URL:
-    raise RuntimeError("KSERVE_URL is not set. Put it in .env")
+ml = {}
 
-class TextRequest(BaseModel):
-    text: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ml["tokenizer"] = AutoTokenizer.from_pretrained(MODEL_DIR)
+    ml["model"] = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
+    ml["model"].eval()
+    yield
+    ml.clear()
+
+app = FastAPI(lifespan=lifespan)
+
+class Request(BaseModel):
+    input_ids: list
 
 @app.post("/predict")
-def predict(req: TextRequest):
-    payload = {"instances": [[5.1, 3.5, 1.4, 0.2]]}
-    print("PREDICT HIT")
-    try:
-        response = requests.post(KSERVE_URL, json=payload)
-        response.raise_for_status()
-        return response.json()
+def predict(req: Request):
+    model = ml["model"]
+    input_ids = torch.tensor(req.input_ids)
+    with torch.no_grad():
+        outputs = model(input_ids=input_ids)
+    return {"logits": outputs.logits.tolist()}
 
-    except requests.exceptions.HTTPError:
-        raise HTTPException(status_code=response.status_code, detail=response.text)
-
-    except Exception as e:
-        print("ERROR TYPE:", type(e))
-        print("ERROR DETAIL:", repr(e))
-        raise HTTPException(status_code=500, detail=repr(e))
-
-@app.get("/health")
+@app.get("/healthz")
 def health():
-    print("KSERVE_URL =", KSERVE_URL)
-    return {"ok": True}
+    return {"status": "ok"}

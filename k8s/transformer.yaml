@@ -1,0 +1,34 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: review-sentiment
+spec:
+  predictor:
+    serviceAccountName: s3-service-account
+    initContainers:
+    - name: storage-initializer
+      image: kserve/storage-initializer:latest
+      args:
+        - s3://aide1-ap-southeast-1/models/review-sentiment
+        - /mnt/models/model
+      envFrom:
+        - secretRef:
+            name: s3-credentials
+      volumeMounts:
+        - name: model-storage
+          mountPath: /mnt/models/model
+    containers:
+      - name: kserve-container
+        image: khoinguyenpham/review-sentiment:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000
+        env:
+          - name: MODEL_DIR
+            value: /mnt/models/model
+        volumeMounts:
+          - name: model-storage
+            mountPath: /mnt/models/model
+    volumes:
+      - name: model-storage
+        emptyDir: {}

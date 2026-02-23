@@ -3,9 +3,8 @@ kind: Service
 metadata:
   name: fastapi-gateway
 spec:
-  type: ClusterIP
   selector:
     app: fastapi-gateway
   ports:
-  - port: 80
-    targetPort: 8000
+    - port: 8080
+      targetPort: 8080

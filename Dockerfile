@@ -1,13 +1,10 @@
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
 WORKDIR /app
 
-COPY requirements.gateway.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.gateway.txt
+COPY requirements/requirements.gateway.txt .
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip install -r requirements.gateway.txt
 
 COPY src ./src
 

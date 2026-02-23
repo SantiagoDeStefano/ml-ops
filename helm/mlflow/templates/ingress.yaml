@@ -1,16 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: fastapi-ingress
+  name: mlflow
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
-    - http:
+    - host: mlflow.local
+      http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: fastapi-gateway
+                name: mlflow
                 port:
-                  number: 80
+                  number: 5000

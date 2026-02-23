@@ -3,6 +3,6 @@ torch
 datasets
 transformers
 transformers[torch]
-tensorflow
 dvc
 dvc-s3
+boto3

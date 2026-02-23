@@ -15,6 +15,7 @@ import mlflow.transformers
 
 MODEL_NAME = "google/bert_uncased_L-2_H-128_A-2"
 OUT_MODEL_DIR = "models/model"
+MLFLOW_TRACKING_URI="http://localhost:5000"
 
 TEXT_COL = "review"
 LABEL_COL = "sentiment"
@@ -96,6 +97,7 @@ def main():
         compute_metrics=compute_metrics,
     )
 
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment("review-sentiment")
 
     with mlflow.start_run():

@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+requests
+python-dotenv
+pydantic
+transformers
+protobuf
+sentencepiece
+tiktoken

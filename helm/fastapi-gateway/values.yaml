@@ -1,0 +1,20 @@
+image:
+  repository: khoinguyenpham/fastapi-gateway
+  tag: latest
+
+service:
+  port: 8080
+
+kserve:
+  url: http://review-sentiment-predictor.default.svc.cluster.local/predict
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilization: 70
+
+resources:
+  requests:
+    cpu: "250m"
+  limits:
+    cpu: "500m"
