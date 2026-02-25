@@ -1,6 +1,5 @@
 import mlflow
 import os
-import shutil
 
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MODEL_NAME = os.getenv("MODEL_NAME", "review-sentiment-transformer")

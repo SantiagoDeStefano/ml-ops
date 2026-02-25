@@ -11,3 +11,4 @@ opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
 opentelemetry-exporter-otlp
+--extra-index-url https://download.pytorch.org/whl/cpu
