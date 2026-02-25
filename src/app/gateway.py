@@ -5,9 +5,24 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Auto
 import httpx
 import torch
 import os
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import Resource
+
 
 KSERVE_URL = os.getenv("KSERVE_URL", "http://review-sentiment-predictor-00001-private.default.svc.cluster.local/predict")
 MODEL_DIR = os.getenv("MODEL_DIR", "/app/tokenizer")
+JAEGER_ENDPOINT = os.getenv("JAEGER_ENDPOINT", "jaeger.monitoring.svc.cluster.local:4317")
+
+provider = TracerProvider(
+    resource=Resource.create({"service.name": "fastapi-gateway"})
+)
+exporter = OTLPSpanExporter(endpoint=JAEGER_ENDPOINT, insecure=True)
+provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(provider)
 
 ml = {}
 
@@ -19,6 +34,7 @@ async def lifespan(app: FastAPI):
     ml.clear()
 
 app = FastAPI(lifespan=lifespan)
+FastAPIInstrumentor.instrument_app(app)
 
 class Request(BaseModel):
     text: str

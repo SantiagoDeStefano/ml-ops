@@ -4,6 +4,9 @@ metadata:
   name: fastapi-gateway
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required Password is 1qaz2wsx"
 spec:
   ingressClassName: nginx
   rules:
