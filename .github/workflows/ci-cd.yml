@@ -67,7 +67,7 @@ jobs:
 
       - name: Build and push predictor
         run: |
-          docker build -f src/app/Dockerfile.predictor -t khoinguyenpham/review-sentiment:latest .
+          docker build -f src/app/Dockerfile.main -t khoinguyenpham/review-sentiment:latest .
           docker push khoinguyenpham/review-sentiment:latest
 
       - name: Build and push gateway
