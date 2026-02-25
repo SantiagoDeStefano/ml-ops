@@ -23,7 +23,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/test_gateway.py --cov=src/app/gateway.py --cov-report=xml --cov-fail-under=80
+          pytest tests/test_gateway.py --cov=src.app.gateway --cov-fail-under=80
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
