@@ -1,0 +1,4 @@
+apiVersion: v2
+name: evidently
+description: Evidently Data Drift Service
+version: 0.1.0

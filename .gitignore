@@ -1,8 +1,29 @@
-.venv
-__pycache__
-notebooks/.ipynb_checkpoints
+# Virtualenv
+.venv/
+
+# Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Notebooks
+**/.ipynb_checkpoints/
+
+# ML artifacts
 models/
 outputs/
 mlruns/
-/metrics.json
+metrics.json
+
+# Env
 .env
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+
+# Misc
+*.log
+.DS_Store

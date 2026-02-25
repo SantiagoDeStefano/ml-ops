@@ -1,0 +1,6 @@
+image:
+  repository: khoinguyenpham/evidently-service
+  tag: latest
+
+service:
+  port: 8001
