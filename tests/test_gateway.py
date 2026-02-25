@@ -1,16 +1,12 @@
 import pytest
 import torch
 import os
-import sys
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 
 os.environ["MODEL_DIR"] = "models/model"
 os.environ["KSERVE_URL"] = "http://mock-kserve/predict"
 os.environ["JAEGER_ENDPOINT"] = "localhost:4317"
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src/app"))
-
 
 @pytest.fixture
 def client():
