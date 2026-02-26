@@ -68,10 +68,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push predictor
-        run: |
-          docker build -f src/app/Dockerfile.main -t khoinguyenpham/review-sentiment:latest .
-          docker push khoinguyenpham/review-sentiment:latest
+      # - name: Build and push predictor
+      #   run: |
+      #     docker build -f src/app/Dockerfile.main -t khoinguyenpham/review-sentiment:latest .
+      #     docker push khoinguyenpham/review-sentiment:latest
 
       - name: Build and push gateway
         run: |
