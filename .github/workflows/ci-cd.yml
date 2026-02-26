@@ -51,6 +51,9 @@ jobs:
         run: |
           pip install mlflow boto3
           python scripts/pull_model.py
+      - name: Debug downloaded files
+        run: |
+          find models/ -type f
 
       # - name: Push model to S3
       #   env:
