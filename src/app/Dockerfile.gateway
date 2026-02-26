@@ -7,8 +7,8 @@ COPY requirements/requirements.gateway.txt .
 RUN pip install -r requirements.gateway.txt
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-COPY models/model/tokenizer.json /app/tokenizer/
-COPY models/model/tokenizer_config.json /app/tokenizer/
+COPY models/components/tokenizer/tokenizer.json /app/tokenizer/
+COPY models/components/tokenizer/tokenizer_config.json /app/tokenizer/
 COPY models/model/config.json /app/tokenizer/
 
 COPY src/app/gateway.py .
