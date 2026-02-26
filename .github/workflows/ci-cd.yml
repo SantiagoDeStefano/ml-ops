@@ -43,14 +43,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      # - name: Pull model from MLflow
-      #   env:
-      #     MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #   run: |
-      #     pip install mlflow boto3
-      #     python scripts/pull_model.py
+      - name: Pull model from MLflow
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          pip install mlflow boto3
+          python scripts/pull_model.py
 
       # - name: Push model to S3
       #   env:
