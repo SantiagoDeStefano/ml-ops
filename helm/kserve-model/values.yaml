@@ -1,6 +1,6 @@
 model:
   name: review-sentiment
-  s3Uri: s3://aide1-ap-southeast-1/models/review-sentiment/model
+  s3Uri: s3://aide1-ap-southeast-1/models/review-sentiment
   serviceAccountName: s3-service-account
   dir: /mnt/models/model
 
