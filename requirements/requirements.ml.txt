@@ -5,3 +5,5 @@ dvc
 dvc-s3
 boto3
 uvicorn[standard]
+sentencepiece
+tiktoken
