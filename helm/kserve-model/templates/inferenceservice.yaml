@@ -1,0 +1,39 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: {{ .Values.model.name }}
+spec:
+  predictor:
+    serviceAccountName: {{ .Values.model.serviceAccountName }}
+    initContainers:
+    - name: storage-initializer
+      image: kserve/storage-initializer:latest
+      args:
+        - {{ .Values.model.s3Uri }}
+        - /mnt/models/model
+      envFrom:
+        - secretRef:
+            name: s3-credentials
+      volumeMounts:
+        - name: model-storage
+          mountPath: /mnt/models/model
+    containers:
+      - name: kserve-container
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000
+        env:
+          - name: MODEL_DIR
+            value: {{ .Values.model.dir }}
+        resources:
+          requests:
+            cpu: "250m"
+          limits:
+            cpu: "500m"
+        volumeMounts:
+          - name: model-storage
+            mountPath: /mnt/models/model
+    volumes:
+      - name: model-storage
+        emptyDir: {}

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: kserve-model
+description: KServe InferenceService for review sentiment
+version: 0.1.0

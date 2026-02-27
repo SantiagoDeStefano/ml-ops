@@ -1,0 +1,9 @@
+model:
+  name: review-sentiment
+  s3Uri: s3://aide1-ap-southeast-1/models/review-sentiment/model
+  serviceAccountName: s3-service-account
+  dir: /mnt/models/model
+
+image:
+  repository: khoinguyenpham/review-sentiment
+  tag: latest
