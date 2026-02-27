@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification
 import torch
 import os
 
@@ -11,7 +11,6 @@ ml = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ml["tokenizer"] = AutoTokenizer.from_pretrained(MODEL_DIR)
     ml["model"] = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
     ml["model"].eval()
     yield
