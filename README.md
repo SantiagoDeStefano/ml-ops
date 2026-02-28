@@ -1,17 +1,57 @@
 # ML-Ops: Review Sentiment Analysis
 
-A production-grade MLOps stack for sentiment analysis using BERT, built on Kubernetes.
+A MLOps stack for sentiment analysis using BERT, built on Kubernetes.
 
-## Architecture
+## Table of Contents
+
+1. [Overview](#ml-ops-review-sentiment-analysis)
+2. [High Level Architecture](#high-level-architecture)
+3. [Project Structure](#project-structure)
+4. [Stack](#stack)
+5. [Prerequisites](#prerequisites)
+
+6. [Infrastructure — Provision EKS](#1-infrastructure--provision-eks)
+7. [Install Cluster Components](#2-install-cluster-components)
+8. [Kubernetes Secrets](#3-kubernetes-secrets)
+9. [Data — Pull with DVC](#4-data--pull-with-dvc)
+10. [Model — Train and Log to MLflow](#5-model--train-and-log-to-mlflow)
+
+11. [CI/CD — GitHub Actions](#6-cicd--github-actions)
+12. [Deploy Model](#7-deploy-model)
+13. [Testing](#8-testing)
+14. [Accessing Services](#9-accessing-services)
+15. [Send a Prediction](#10-send-a-prediction)
+16. [Destroy Infrastructure](#11-destroy-infrastructure)
+
+## High level architecture
 
 ```
-User → NGINX Ingress (Basic Auth) → FastAPI Gateway → KServe (BERT Model)
-                                         ↓
-                              Jaeger (Tracing) + Loki (Logging)
-                                         ↓
-                              Prometheus + Grafana (Metrics)
-                                         ↓
-                              Evidently (Data Drift)
+![image alt](https://github.com/SantiagoDeStefano/ml-ops/blob/59f6d1d5ab1fb936cec8cc86c6197f0d425d9ba9/images/ml-ops-highlevel-architecture.png)
+```
+
+## Project Structure
+
+```
+ml-ops/
+├── .github/workflows/    # CI/CD pipeline
+├── data/                 # DVC-tracked data
+├── helm/                 # Helm charts
+│   ├── evidently/
+│   ├── fastapi-gateway/
+│   ├── kserve-model/
+│   └── mlflow/
+├── infra/eks/            # Terraform (EKS)
+├── k8s/                  # Raw Kubernetes manifests
+├── requirements/         # Python dependencies
+├── scripts/              # Utility scripts (pull_model.py)
+├── src/
+│   ├── app/              # FastAPI gateway + KServe predictor
+│   ├── evidently/        # Drift detection service
+│   ├── common/           # Shared utilities
+│   ├── train.py          # Model training
+│   └── eval.py           # Model evaluation
+├── tests/                # Unit + integration tests
+└── helmfile.yaml         # Helmfile for all charts
 ```
 
 ## Stack
@@ -30,6 +70,10 @@ User → NGINX Ingress (Basic Auth) → FastAPI Gateway → KServe (BERT Model)
 | Infrastructure | Terraform (EKS) |
 | CI/CD | GitHub Actions |
 | Packaging | Helm + Helmfile |
+
+---
+
+## Guide to install and run code:
 
 ---
 
@@ -217,7 +261,7 @@ curl -u admin:<password> \
 
 Response:
 ```json
-{"label": "POSITIVE", "confidence": 0.98}
+{"label": "Positive", "confidence": 0.98}
 ```
 
 ---
@@ -230,28 +274,3 @@ terraform destroy
 ```
 
 ---
-
-## Project Structure
-
-```
-ml-ops/
-├── .github/workflows/    # CI/CD pipeline
-├── data/                 # DVC-tracked data
-├── helm/                 # Helm charts
-│   ├── evidently/
-│   ├── fastapi-gateway/
-│   ├── kserve-model/
-│   └── mlflow/
-├── infra/eks/            # Terraform (EKS)
-├── k8s/                  # Raw Kubernetes manifests
-├── requirements/         # Python dependencies
-├── scripts/              # Utility scripts (pull_model.py)
-├── src/
-│   ├── app/              # FastAPI gateway + KServe predictor
-│   ├── evidently/        # Drift detection service
-│   ├── common/           # Shared utilities
-│   ├── train.py          # Model training
-│   └── eval.py           # Model evaluation
-├── tests/                # Unit + integration tests
-└── helmfile.yaml         # Helmfile for all charts
-```
