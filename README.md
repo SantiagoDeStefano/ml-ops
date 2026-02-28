@@ -10,13 +10,13 @@ A MLOps stack for sentiment analysis using BERT, built on Kubernetes.
 4. [Stack](#stack)
 5. [Prerequisites](#prerequisites)
 
-6. [Infrastructure — Provision EKS](#1-infrastructure--provision-eks)
+6. [Infrastructure - Provision EKS](#1-infrastructure--provision-eks)
 7. [Install Cluster Components](#2-install-cluster-components)
 8. [Kubernetes Secrets](#3-kubernetes-secrets)
-9. [Data — Pull with DVC](#4-data--pull-with-dvc)
-10. [Model — Train and Log to MLflow](#5-model--train-and-log-to-mlflow)
+9. [Data - Pull with DVC](#4-data--pull-with-dvc)
+10. [Model - Train and Log to MLflow](#5-model--train-and-log-to-mlflow)
 
-11. [CI/CD — GitHub Actions](#6-cicd--github-actions)
+11. [CI/CD - GitHub Actions](#6-cicd--github-actions)
 12. [Deploy Model](#7-deploy-model)
 13. [Testing](#8-testing)
 14. [Accessing Services](#9-accessing-services)
@@ -91,7 +91,7 @@ ml-ops/
 
 ---
 
-## 1. Infrastructure — Provision EKS
+## 1. Infrastructure  Provision EKS
 
 ```bash
 cd infra/eks
@@ -157,7 +157,7 @@ kubectl apply -f k8s/serviceaccount.yaml
 
 ---
 
-## 4. Data — Pull with DVC
+## 4. Data - Pull with DVC
 
 ```bash
 pip install -r requirements/requirements.ml.txt
@@ -166,7 +166,7 @@ dvc pull
 
 ---
 
-## 5. Model — Train and Log to MLflow
+## 5. Model - Train and Log to MLflow
 
 Port-forward MLflow:
 ```bash
@@ -183,7 +183,7 @@ Model will be logged to MLflow and artifacts stored in S3.
 
 ---
 
-## 6. CI/CD — GitHub Actions
+## 6. CI/CD - GitHub Actions
 
 ### Secrets required in GitHub repository:
 
