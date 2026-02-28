@@ -112,7 +112,7 @@ Install KServe and Knative manually (not via Helm):
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
 
 # KServe
-kubectl apply -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
+kubectl apply --server-side -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
 
 # Knative
 kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
