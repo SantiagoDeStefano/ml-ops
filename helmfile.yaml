@@ -1,0 +1,76 @@
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: jaegertracing
+    url: https://jaegertracing.github.io/helm-charts
+
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    values:
+      - crds:
+          enabled: true
+
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    createNamespace: true
+    chart: ingress-nginx/ingress-nginx
+
+  - name: prometheus
+    namespace: monitoring
+    createNamespace: true
+    chart: prometheus-community/kube-prometheus-stack
+    values:
+      - grafana:
+          enabled: true
+
+  - name: loki
+    namespace: monitoring
+    chart: grafana/loki-stack
+    values:
+      - grafana:
+          enabled: false
+      - prometheus:
+          enabled: false
+
+  - name: jaeger
+    namespace: monitoring
+    chart: jaegertracing/jaeger
+    values:
+      - allInOne:
+          enabled: true
+      - provisionDataStore:
+          cassandra: false
+      - storage:
+          type: memory
+      - agent:
+          enabled: false
+      - collector:
+          enabled: false
+      - query:
+          enabled: false
+
+  - name: mlflow
+    namespace: mlflow
+    createNamespace: true
+    chart: ./helm/mlflow
+
+  - name: fastapi-gateway
+    namespace: default
+    chart: ./helm/fastapi-gateway
+
+  - name: evidently
+    namespace: default
+    chart: ./helm/evidently
+
+  - name: kserve-model
+    namespace: default
+    chart: ./helm/kserve-model
