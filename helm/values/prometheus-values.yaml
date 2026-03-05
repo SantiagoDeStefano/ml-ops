@@ -1,0 +1,9 @@
+grafana:
+  additionalDataSources: []
+  grafana.ini:
+    datasources:
+      default_datasource_enabled: false
+  sidecar:
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: false

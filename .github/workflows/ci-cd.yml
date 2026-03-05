@@ -87,8 +87,11 @@ jobs:
           aws eks update-kubeconfig --name eks-ap-southeast-1 --region ap-southeast-1
 
       - name: Deploy with Helm
-        run: |
-          helm upgrade --install fastapi-gateway helm/fastapi-gateway
-          helm upgrade --install evidently helm/evidently
-          helm upgrade --install mlflow helm/mlflow
-          kubectl apply -f k8s/transformer.yaml
+              run: |
+                helm upgrade --install fastapi-gateway helm/fastapi-gateway
+                helm upgrade --install evidently helm/evidently
+                helm upgrade --install mlflow helm/mlflow
+                helm upgrade --install kserve-model helm/kserve-model
+                kubectl apply -f k8s/serviceaccount.yaml
+                kubectl patch configmap config-features -n knative-serving --type merge -p '{"data":{"kubernetes.podspec-init-containers":"enabled"}}'
+                kubectl patch configmap config-network -n knative-serving --type merge -p '{"data":{"ingress-class":"kourier.ingress.networking.knative.dev"}}'

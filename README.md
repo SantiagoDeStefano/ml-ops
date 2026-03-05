@@ -114,6 +114,9 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/do
 # KServe
 kubectl apply --server-side -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
 
+# Kourier
+kubectl apply -f https://github.com/knative/net-kourier/releases/latest/download/kourier.yaml
+
 # Knative
 kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
 kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-core.yaml
@@ -208,6 +211,13 @@ kubectl apply -f k8s/transformer.yaml
 Or via Helm:
 ```bash
 helm install kserve-model helm/kserve-model
+```
+And apply networking:
+```bash
+kubectl patch configmap/config-network \
+  --namespace knative-serving \
+  --type merge \
+  --patch '{"data":{"ingress-class":"kourier.ingress.knative.dev"}}'
 ```
 
 ---

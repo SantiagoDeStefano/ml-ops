@@ -11,5 +11,5 @@ variable "node_instance_type" {
 }
 
 variable "desired_nodes" {
-  default = 1
+  default = 3
 }

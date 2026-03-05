@@ -1,4 +1,4 @@
-mlflow
+mlflow==2.19.0
 datasets
 transformers
 dvc

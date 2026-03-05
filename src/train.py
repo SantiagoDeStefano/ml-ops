@@ -15,7 +15,7 @@ import mlflow.transformers
 
 MODEL_NAME = "google/bert_uncased_L-2_H-128_A-2"
 OUT_MODEL_DIR = "models/model"
-MLFLOW_TRACKING_URI="http://localhost:5000"
+MLFLOW_TRACKING_URI = "http://52.76.209.224.nip.io"
 
 TEXT_COL = "review"
 LABEL_COL = "sentiment"
@@ -29,6 +29,7 @@ def compute_metrics(eval_pred):
         "accuracy": accuracy_score(labels, preds),
         "f1": f1_score(labels, preds, average="weighted"),
     }
+
 
 def main():
     train_df = pd.read_csv("data/processed/train.csv")

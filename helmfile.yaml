@@ -29,8 +29,7 @@ releases:
     createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
     values:
-      - grafana:
-          enabled: true
+      - helm/values/prometheus-values.yaml
 
   - name: loki
     namespace: monitoring
@@ -40,6 +39,14 @@ releases:
           enabled: false
       - prometheus:
           enabled: false
+      - loki:
+          image:
+            tag: 2.9.3
+      - grafana-agent:
+          enabled: false
+      - promtail:
+          grafana:
+            defaultDatasourceEnabled: false
 
   - name: jaeger
     namespace: monitoring

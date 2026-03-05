@@ -22,9 +22,14 @@ spec:
             - --port=5000
             - --default-artifact-root={{ .Values.s3.bucket }}
             - --backend-store-uri=sqlite:///mlflow.db
+            - --dev
           ports:
             - containerPort: 5000
           env:
+            - name: GUNICORN_CMD_ARGS
+              value: "--forwarded-allow-ips=*"
+            - name: MLFLOW_DISABLE_HOSTNAME_VALIDATION
+              value: "true"
             - name: AWS_DEFAULT_REGION
               value: {{ .Values.s3.region }}
           envFrom:

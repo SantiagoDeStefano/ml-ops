@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/mlflow/mlflow
-  tag: latest
+  tag: v2.19.0
 
 service:
   port: 5000
