@@ -4,27 +4,28 @@ A MLOps stack for sentiment analysis using BERT, built on Kubernetes.
 
 ## Table of Contents
 
-1. [Overview](#ml-ops-review-sentiment-analysis)
-2. [High Level Architecture](#high-level-architecture)
-3. [Project Structure](#project-structure)
-4. [Stack](#stack)
-5. [Prerequisites](#prerequisites)
+1. [High Level Architecture](#high-level-architecture)
+2. [Project Structure](#project-structure)
+3. [Stack](#stack)
+4. [Prerequisites](#prerequisites)
+5. [Infrastructure - Provision EKS](#1-infrastructure--provision-eks)
+6. [Install Cluster Components](#2-install-cluster-components)
+7. [Kubernetes Secrets](#3-kubernetes-secrets)
+8. [Data - Pull with DVC](#4-data--pull-with-dvc)
+9. [Model - Train and Log to MLflow](#5-model--train-and-log-to-mlflow)
+10. [CI/CD - GitHub Actions](#6-cicd--github-actions)
+11. [Deploy Model](#7-deploy-model)
+12. [Testing](#8-testing)
+13. [Accessing Services](#9-accessing-services)
+14. [Send a Prediction](#10-send-a-prediction)
+15. [Destroy Infrastructure](#11-destroy-infrastructure)
 
-6. [Infrastructure - Provision EKS](#1-infrastructure--provision-eks)
-7. [Install Cluster Components](#2-install-cluster-components)
-8. [Kubernetes Secrets](#3-kubernetes-secrets)
-9. [Data - Pull with DVC](#4-data--pull-with-dvc)
-10. [Model - Train and Log to MLflow](#5-model--train-and-log-to-mlflow)
+---
 
-11. [CI/CD - GitHub Actions](#6-cicd--github-actions)
-12. [Deploy Model](#7-deploy-model)
-13. [Testing](#8-testing)
-14. [Accessing Services](#9-accessing-services)
-15. [Send a Prediction](#10-send-a-prediction)
-16. [Destroy Infrastructure](#11-destroy-infrastructure)
-
-## High level architecture
+## High Level Architecture
 ![High Level Architecture](images/ml-ops-highlevel-architecture.png)
+
+---
 
 ## Project Structure
 
@@ -51,6 +52,8 @@ ml-ops/
 └── helmfile.yaml         # Helmfile for all charts
 ```
 
+---
+
 ## Stack
 
 | Component | Technology |
@@ -70,25 +73,26 @@ ml-ops/
 
 ---
 
-## Guide to install and run code:
-
----
-
 ## Prerequisites
 
 - AWS account with IAM user (not root) with `AdministratorAccess`
-- AWS CLI configured: `aws configure --profile eks-admin`
+- AWS CLI configured with IAM user (not root):
+  ```bash
+  aws configure --profile eks-admin
+  ```
 - Docker
 - kubectl
 - Helm
-- Helmfile
+- Helmfile v1.3.2+
 - Terraform
 - Python 3.10+
 - DVC with S3 remote
 
+> **Important:** Do not use root credentials. Create an IAM user with `AdministratorAccess` and use those credentials throughout.
+
 ---
 
-## 1. Infrastructure  Provision EKS
+## 1. Infrastructure — Provision EKS
 
 ```bash
 cd infra/eks
@@ -96,9 +100,23 @@ terraform init
 terraform apply
 ```
 
-Update kubeconfig:
+Update kubeconfig and grant EKS access:
 ```bash
 aws eks update-kubeconfig --name eks-ap-southeast-1 --region ap-southeast-1 --profile eks-admin
+
+aws eks create-access-entry \
+  --cluster-name eks-ap-southeast-1 \
+  --principal-arn arn:aws:iam::<account-id>:user/eks-admin \
+  --type STANDARD \
+  --region ap-southeast-1
+
+aws eks associate-access-policy \
+  --cluster-name eks-ap-southeast-1 \
+  --principal-arn arn:aws:iam::<account-id>:user/eks-admin \
+  --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy \
+  --access-scope type=cluster \
+  --region ap-southeast-1
+
 kubectl get nodes
 ```
 
@@ -106,58 +124,70 @@ kubectl get nodes
 
 ## 2. Install Cluster Components
 
-Install KServe and Knative manually (not via Helm):
+Install in this exact order — each step depends on the previous:
+
 ```bash
-# cert-manager
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+# 1. cert-manager
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.0/cert-manager.yaml
 
-# KServe
-kubectl apply --server-side -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
+# 2. Knative CRDs + core
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-crds.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-core.yaml
 
-# Kourier
-kubectl apply -f https://github.com/knative/net-kourier/releases/latest/download/kourier.yaml
+# 3. Kourier (Knative networking)
+kubectl apply -f https://github.com/knative-extensions/net-kourier/releases/download/knative-v1.16.0/kourier.yaml
 
-# Knative
-kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-crds.yaml
-kubectl apply -f https://github.com/knative/serving/releases/latest/download/serving-core.yaml
+# 4. Configure Knative to use Kourier
+kubectl patch configmap/config-network \
+  --namespace knative-serving \
+  --type merge \
+  --patch '{"data":{"ingress-class":"kourier.ingress.knative.dev"}}'
+
+# 5. Enable init-containers (required for KServe storage initializer)
+kubectl patch configmap config-features -n knative-serving \
+  --type merge \
+  -p '{"data":{"kubernetes.podspec-init-containers":"enabled"}}'
+
+# 6. KServe (apply twice — first pass installs CRDs, second installs everything)
+kubectl apply --server-side --force-conflicts -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
+kubectl apply --server-side --force-conflicts -f https://github.com/kserve/kserve/releases/latest/download/kserve.yaml
 ```
 
-Install everything else with Helmfile:
+Install all other components with Helmfile:
 ```bash
 helmfile sync
 ```
+
+> **Note:** cert-manager, KServe, and Knative are installed via `kubectl apply` — they have no official Helm charts. Everything else is managed by Helmfile.
 
 ---
 
 ## 3. Kubernetes Secrets
 
-Create S3 credentials secret:
 ```bash
+# S3 credentials (default namespace)
 kubectl create secret generic s3-credentials \
   --from-literal=AWS_ACCESS_KEY_ID=<your-key> \
   --from-literal=AWS_SECRET_ACCESS_KEY=<your-secret>
 
-# Copy to mlflow namespace
-kubectl get secret s3-credentials -n default -o yaml | \
-  sed 's/namespace: default/namespace: mlflow/' | \
-  kubectl apply -f -
-```
+# S3 credentials (mlflow namespace)
+kubectl create secret generic s3-credentials \
+  --from-literal=AWS_ACCESS_KEY_ID=<your-key> \
+  --from-literal=AWS_SECRET_ACCESS_KEY=<your-secret> \
+  -n mlflow
 
-Create basic auth secret for NGINX:
-```bash
+# Basic auth for NGINX gateway
 sudo apt install apache2-utils
-htpasswd -c auth admin
+htpasswd -c auth admin   # enter your password when prompted
 kubectl create secret generic basic-auth --from-file=auth
-```
 
-Create service account:
-```bash
+# Service account for KServe S3 access
 kubectl apply -f k8s/serviceaccount.yaml
 ```
 
 ---
 
-## 4. Data - Pull with DVC
+## 4. Data — Pull with DVC
 
 ```bash
 pip install -r requirements/requirements.ml.txt
@@ -166,71 +196,77 @@ dvc pull
 
 ---
 
-## 5. Model - Train and Log to MLflow
+## 5. Model — Train and Log to MLflow
 
-Port-forward MLflow:
+Get MLflow public URL:
 ```bash
-kubectl port-forward svc/mlflow 5000:5000 -n mlflow
+kubectl get ingress -n mlflow
+# Note the HOST value, e.g. 52.76.209.224.nip.io
 ```
 
 Train and log model:
 ```bash
-export MLFLOW_TRACKING_URI=http://localhost:5000
+export MLFLOW_TRACKING_URI=http://<mlflow-host>
 python src/train.py
 ```
 
-Model will be logged to MLflow and artifacts stored in S3.
+Model will be registered in MLflow as `review-sentiment-transformer` and artifacts stored in S3.
 
 ---
 
-## 6. CI/CD - GitHub Actions
+## 6. CI/CD — GitHub Actions
 
-### Secrets required in GitHub repository:
+### Required GitHub Secrets (in `ML_OPS_ENVIRONMENTS` environment):
 
 | Secret | Description |
 |---|---|
-| `AWS_ACCESS_KEY_ID` | AWS access key |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key |
+| `AWS_ACCESS_KEY_ID` | IAM user access key (eks-admin, not root) |
+| `AWS_SECRET_ACCESS_KEY` | IAM user secret key |
 | `DOCKERHUB_USERNAME` | DockerHub username |
 | `DOCKERHUB_TOKEN` | DockerHub access token |
-| `MLFLOW_TRACKING_URI` | MLflow server URL (EKS) |
+| `MLFLOW_TRACKING_URI` | MLflow public URL (e.g. `http://52.76.209.224.nip.io`) |
+| `BASIC_AUTH_PASSWORD` | Password for NGINX basic auth |
 
 ### Pipeline behavior:
 
-- **Push to main** → runs tests (Pytest, coverage >80%) → auto-triggers build (pull model from MLflow, build and push Docker images)
-- **Manual trigger** (`workflow_dispatch`) → runs test → build → deploy to EKS via Helm
+- **Manual trigger** (`workflow_dispatch`) — runs full pipeline: test → build → deploy
+- **Test**: runs Pytest with >80% coverage requirement, auto-proceeds to build if passed
+- **Build**: pulls model from MLflow on EKS, builds and pushes Docker images to DockerHub
+- **Deploy** (manual trigger only): creates secrets, patches Knative config, runs `helmfile sync`
+
+> **Note:** EKS must be running when triggering CI/CD — MLflow lives on EKS.
 
 ---
 
 ## 7. Deploy Model
 
-```bash
-kubectl apply -f k8s/transformer.yaml
-```
+The CI/CD deploy job handles this automatically. To deploy manually:
 
-Or via Helm:
 ```bash
-helm install kserve-model helm/kserve-model
-```
-And apply networking:
-```bash
-kubectl patch configmap/config-network \
-  --namespace knative-serving \
+kubectl patch configmap config-features -n knative-serving \
   --type merge \
-  --patch '{"data":{"ingress-class":"kourier.ingress.knative.dev"}}'
+  -p '{"data":{"kubernetes.podspec-init-containers":"enabled"}}'
+
+kubectl patch configmap config-network -n knative-serving \
+  --type merge \
+  -p '{"data":{"ingress-class":"kourier.ingress.knative.dev"}}'
+
+helm install kserve-model helm/kserve-model
+kubectl get inferenceservice --watch
 ```
 
 ---
 
 ## 8. Testing
 
-### Unit tests:
+### Unit tests (no cluster required):
 ```bash
 pip install pytest pytest-cov
+pip install -r requirements/requirements.gateway.txt
 pytest tests/test_gateway.py --cov=gateway --cov-fail-under=80
 ```
 
-### Integration tests (requires port-forward):
+### Integration tests (requires running cluster):
 ```bash
 kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx
 pytest tests/test_integration.py -v
@@ -244,7 +280,7 @@ pytest tests/test_integration.py -v
 |---|---|---|
 | Grafana | `kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring` | http://localhost:3000 |
 | Jaeger | `kubectl port-forward svc/jaeger-query 16686:16686 -n monitoring` | http://localhost:16686 |
-| MLflow | `kubectl port-forward svc/mlflow 5000:5000 -n mlflow` | http://localhost:5000 |
+| MLflow | Public via ingress | `http://<mlflow-host>` |
 | Evidently | `kubectl port-forward svc/evidently 8001:8001` | http://localhost:8001 |
 | Gateway | `kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx` | http://localhost:8080 |
 
@@ -259,6 +295,10 @@ kubectl --namespace monitoring get secrets prometheus-grafana \
 ## 10. Send a Prediction
 
 ```bash
+# Port-forward NGINX ingress
+kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx
+
+# Send prediction
 curl -u admin:<password> \
   -H "Host: gateway.local" \
   -X POST http://localhost:8080/predict \
@@ -268,7 +308,22 @@ curl -u admin:<password> \
 
 Response:
 ```json
-{"label": "Positive", "confidence": 0.98}
+{"label": "POSITIVE", "confidence": 0.98}
+```
+
+### Test data drift (Evidently):
+```bash
+kubectl port-forward svc/evidently 8001:8001
+
+# Log 10+ predictions first
+for i in {1..10}; do
+  curl -X POST http://localhost:8001/log \
+    -H "Content-Type: application/json" \
+    -d '{"review": "this movie is great"}'
+done
+
+# Check drift report
+curl http://localhost:8001/drift
 ```
 
 ---
@@ -280,4 +335,4 @@ cd infra/eks
 terraform destroy
 ```
 
----
+> Remember to destroy the cluster after use to avoid ongoing AWS costs.
