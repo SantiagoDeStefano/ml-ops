@@ -11,13 +11,13 @@ repositories:
     url: https://jaegertracing.github.io/helm-charts
 
 releases:
-  - name: cert-manager
-    namespace: cert-manager
-    createNamespace: true
-    chart: jetstack/cert-manager
-    values:
-      - crds:
-          enabled: true
+  # - name: cert-manager
+  #   namespace: cert-manager
+  #   createNamespace: true
+  #   chart: jetstack/cert-manager
+  #   values:
+  #     - crds:
+  #         enabled: true
 
   - name: ingress-nginx
     namespace: ingress-nginx
