@@ -1,7 +1,6 @@
-mlflow==2.19.0
-datasets
 transformers
-dvc
-dvc-s3
-boto3
+sentencepiece
+tiktoken
+fastapi
 uvicorn[standard]
+pydantic
