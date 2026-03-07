@@ -23,7 +23,6 @@ A MLOps stack for sentiment analysis using BERT, built on Kubernetes.
 ---
 
 ## High Level Architecture
-![High Level Architecture](images/ml-ops-highlevel-architecture.png)
 
 ---
 
