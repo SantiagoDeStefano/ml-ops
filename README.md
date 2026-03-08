@@ -308,7 +308,7 @@ curl -u admin:<password> \
 
 Response:
 ```json
-{"label": "POSITIVE", "confidence": 0.98}
+{"label": "positive", "confidence": 0.98}
 ```
 
 ### Test data drift (Evidently):
@@ -316,7 +316,7 @@ Response:
 kubectl port-forward svc/evidently 8001:8001
 
 # Log 10+ predictions first
-for i in {1..10}; do
+for i in {1..11}; do
   curl -X POST http://localhost:8001/log \
     -H "Content-Type: application/json" \
     -d '{"review": "this movie is great"}'
